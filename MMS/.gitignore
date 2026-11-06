@@ -1,0 +1,5 @@
+# The 2 directories and the file below only need to exist in the container.
+# Since we're mounting the entire folder for ease of use, they will appear on the host machine too and can be ignored.
+/build/*
+/__pycache__/*
+_core.cpython-313-x86_64-linux-gnu.so
