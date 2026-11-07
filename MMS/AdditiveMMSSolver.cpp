@@ -111,14 +111,14 @@ int AdditiveMMSSolver::mms_additive() {
     do {
         num_items_before_allocation = num_items;
         proportional_share = total_items_value / num_agents;
-        std::printf("Proportional Share of the instance: %llu\n", proportional_share);
-        std::printf("\t Num agents:%d \t Num items: %d\n", num_agents, num_items);
+        //std::printf("Proportional Share of the instance: %llu\n", proportional_share);
+        //std::printf("\t Num agents:%d \t Num items: %d\n", num_agents, num_items);
 
         for(int i=0; i<num_items; i++) { 
             // Allocate any item of value higher than the proportional share to a bundle and 
             // reduce number of bundles and number of items by 1.
             if(item_values[i] >= proportional_share) {
-                std::printf("allocating item %d with value %llu\n", i, item_values[i]);
+                //std::printf("allocating item %d with value %llu\n", i, item_values[i]);
                 num_agents--;
                 unsigned long long temp_val = item_values[i];
                 item_values[i] = item_values[num_items-1];
@@ -154,17 +154,17 @@ int AdditiveMMSSolver::mms_additive() {
     while (low <= high) {
         unsigned long long mid = (low + high) / 2;
         
-        std::printf("Current MMS range: %d to %d \t Testing: %d \t", low, high, mid);
+        //std::printf("Current MMS range: %d to %d \t Testing: %d \t", low, high, mid);
 
         unsigned long long sums[num_agents]; 
         for(int i=0; i<num_agents; i++) sums[i] = 0;
 
         if ( can_partition(0, sums, mid, total_items_value) ) {
-            std::printf("T\n");
+            //std::printf("T\n");
             low = mid + 1; 
             best_mms = mid;
         } else {
-            std::printf("F\n");
+            //std::printf("F\n");
             high = mid - 1;
         }
     }
