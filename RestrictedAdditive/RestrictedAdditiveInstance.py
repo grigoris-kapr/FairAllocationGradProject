@@ -1,6 +1,7 @@
 from hyperdb import HypergraphDB
 import heapq
 from typing import Dict, List
+import MMS
 
 # A class representing one instance of the problem
 #
@@ -14,7 +15,7 @@ class RestrictedAdditiveInstance:
     
     # init during completion
     all_items_heap: List
-    agent_items_heap: Dict[str, List]
+    agent_items_heap: Dict[int, List]
     items_allocated: List[bool] # item i was allocated if True
 
     def __init__(self):
@@ -27,7 +28,7 @@ class RestrictedAdditiveInstance:
 
     # Adds agent to the exaple. Agents must be added sequentially.
     # Raises error if agentID already exists.
-    def add_agent(self, agentID:str, metadata:dict=None):
+    def add_agent(self, agentID:int, metadata:dict=None):
         if self.complete:
             raise ValueError("Problem Instance was already marked as completed. No additions can be made.")
         if agentID in self.get_agent_IDs():
@@ -104,7 +105,7 @@ class RestrictedAdditiveInstance:
         # mark that no items have been allocated yet
         self.items_allocated = [False for _ in range(self.num_items_ever_added)]
 
-    def get_agent_max_value(self, agentID:str):
+    def get_agent_max_value(self, agentID:int):
         incident_edges = self.graph.nbr_e_of_v(agentID)
         total_value = 0
         for edge in incident_edges:
@@ -116,7 +117,7 @@ class RestrictedAdditiveInstance:
     # Returns the baseline MMS for the agent based on the observation that MMS cannot ever be more than (1/n')*Σ where 
     # Σ is the sum of the (objective) values of the items that the agent is interested in,
     # n' is the number of agents that are competing for said items (including queried agent).
-    def get_agent_proportional_share(self, agentID:str):
+    def get_agent_proportional_share(self, agentID:int):
         max_value = self.get_agent_max_value(agentID)
         agents_competing = len(self.graph.nbr_v(agentID)) + 1 # +1 to include themselves
         return max_value / agents_competing
@@ -138,7 +139,7 @@ class RestrictedAdditiveInstance:
     #   - item value
     #   - item ID
     #   - edge (tupple of agent IDs)
-    def allocate_best_item(self, agentID:str=None):
+    def allocate_best_item(self, agentID:int=None):
         item = None 
         # item will be tupple (-value, ID, (agents))
         # => item[1] is itemID
@@ -161,7 +162,7 @@ class RestrictedAdditiveInstance:
         filtered_agents = [agent for agent in original_agents_list if self.graph.degree_v(agent) > 0]
         return filtered_agents
 
-    def agent_has_item_available(self, agentID: str):
+    def agent_has_item_available(self, agentID: int):
         return self.graph.degree_v(agentID) > 0 # this is sufficient since all allocated items are always deleted
 
     # load from file. see save()
@@ -175,9 +176,19 @@ class RestrictedAdditiveInstance:
         if len(preprocessed_MMS_values.keys()) == len(self.graph._v_data.keys()):
             self.mms_were_manually_provided = True
         
-    def MMS(self, agentID:str): 
+    def MMS(self, agentID:int, symmetry_opt=True): 
         a_data = self.graph.v(agentID)
         if "MMS" in a_data:
             return a_data["MMS"]
         else:
-            raise NotImplementedError("MMS value not provided and MMS calculation not implemented.")
+            item_values = []
+            incident_edges = self.graph.nbr_e_of_v(agentID)
+            for edge in incident_edges:
+                edge_data = self.graph._e_data[edge]
+                for itemID in edge_data:
+                    item_values.append(edge_data[itemID]["val"])
+
+            agents_competing = len(self.graph.nbr_v(agentID)) + 1 # +1 to include themselves
+
+            mms = MMS.AdditiveMMSSolver(agents_competing, item_values, symmetry_opt).mms_additive()
+            return mms

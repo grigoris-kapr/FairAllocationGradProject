@@ -65,7 +65,7 @@ def traversal_allocation(
         # save original instance for later recall as we're going to edit it
         problem_instance.save(save_dir)
 
-    # calculate MMS-baseline per agent to compare to allocated value and determine if we'll need to find real MMS
+    # calculate proportional share per agent to compare to allocated value and determine if we'll need to find exact MMS
     proportional_shares = {}
     for agentID in problem_instance.get_agent_IDs():
         proportional_shares[agentID] = problem_instance.get_agent_proportional_share(agentID)
@@ -90,7 +90,8 @@ def traversal_allocation(
         else:
             instance_MMS_compare = problem_instance
 
-        
+        # this is gonna be the slow part.
+        # can make it multithreaded
         for agentID in agents_for_MMS_comp:
             if instance_MMS_compare.MMS(agentID) > agent_values[agentID]:
                 met_all_MMS = False
