@@ -32,20 +32,22 @@ class RestrictedAdditiveInstance:
         if self.complete:
             raise ValueError("Problem Instance was already marked as completed. No additions can be made.")
         if agentID in self.get_agent_IDs():
-            raise ValueError("An agent with ID " + agentID + " is already present in the graph.")
+            raise ValueError(f"An agent with ID {agentID} is already present in the graph.")
 
         self.graph.add_v(agentID, metadata)
 
     # Add item to example. 
-    # agentsInterested: list of agents IDs for the agents interested in the item
+    # agentsInterested: tuple of agents IDs for the agents interested in the item
     # value: the value of the item, to be added to edge metadata
     # metadata: any metadata that we may need to keep for the item
-    def add_item(self, agents_interested:tuple, value:int, item_metadata:dict=None):
+    def add_item(self, agents_interested:tuple, value:int, item_metadata_provided:dict=None):
         if self.complete:
             raise ValueError("Problem Instance was already marked as completed. No additions can be made.")
 
         itemID = self.num_items_ever_added
-        if item_metadata:
+        if item_metadata_provided:
+            # Copy metadata to void mutation by caller
+            item_metadata = dict(item_metadata_provided)
             item_metadata["val"] = value
         else:
             item_metadata = {
@@ -75,6 +77,8 @@ class RestrictedAdditiveInstance:
             self.graph.remove_e(edge)
         else:
             self.graph._e_data[edge].pop(itemID)
+
+        self.num_items -= 1
         
 
     def mark_completed(self):
@@ -132,6 +136,8 @@ class RestrictedAdditiveInstance:
         self.graph.save(save_dir)
 
     # Returns the first item at top of the respective heap that wasn't allocated. 
+    # Requested heap must have unallocated items or a ValueError will be raised.
+    #
     # Can be a slow method if we frequently switch between all_items_heap and agent_items_heap, 
     # since the respective while condition will often be true.
     #
@@ -144,14 +150,25 @@ class RestrictedAdditiveInstance:
         # item will be tupple (-value, ID, (agents))
         # => item[1] is itemID
         # => self.items_allocated[item[1]] shows if item was previously allocated
-        if agentID:
-            item = heapq.heappop(self.agent_items_heap[agentID])
-            while self.items_allocated[item[1]]:
+        if agentID is not None:
+            try:
                 item = heapq.heappop(self.agent_items_heap[agentID])
-        else:
-            item = heapq.heappop(self.all_items_heap)
-            while self.items_allocated[item[1]]:
+                while self.items_allocated[item[1]] and self.agent_items_heap:
+                    item = heapq.heappop(self.agent_items_heap[agentID])
+            except IndexError:
+                raise ValueError(f"Agent {agentID} requested to allocate an item but has no remaining items.\
+                                 \n\tMake sure to test with agent_has_item_available or filter_agents_by_items_available before requesting item.")
+        else:   
+            try:
                 item = heapq.heappop(self.all_items_heap)
+                while self.items_allocated[item[1]]:
+                    item = heapq.heappop(self.all_items_heap)
+            except IndexError:
+                raise ValueError("All items have been allocated.")
+
+        # Check bad request that would leave item as a previously allocated item
+        if self.items_allocated[item[1]]:
+            raise ValueError("All items in the requested heap have been allocated. Please check item availability before requesting allocation.")
 
         self.items_allocated[item[1]] = True
         self.remove_item(item[2], item[1])

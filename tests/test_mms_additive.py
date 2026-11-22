@@ -105,10 +105,6 @@ def test_mms_additive():
         test = mms_test_cases[i]
         mms_found = AdditiveMMSSolver(test[1], test[3],False).mms_additive()
         mms_found_with_symmetry = AdditiveMMSSolver(test[1], test[3],True).mms_additive()
-        if mms_found == test[4]:
-            print(f"Test case {i} passed!")
-        else:
-            print(f"FAILED test case {i}!!! \n\t{test} \n\tFound MMS {mms_found}")
 
-        if mms_found != mms_found_with_symmetry:
-            print(f"MMS' disagree on case {i}!!! \n\t{test} \n\tSymmetry: {mms_found_with_symmetry} \n\tNo Symmetry: {mms_found}")
+        assert mms_found == test[4], f"FAILED test case {i}!!! \n\t{test} \n\tFound MMS {mms_found}"
+        assert mms_found == mms_found_with_symmetry, f"MMS' disagree on case {i}!!! \n\t{test} \n\tSymmetry: {mms_found_with_symmetry} \n\tNo Symmetry: {mms_found}"
