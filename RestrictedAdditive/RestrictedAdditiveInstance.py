@@ -96,15 +96,15 @@ class RestrictedAdditiveInstance:
             # no need to call heapify on empty list  
 
         # add item to the global heap and to the heap for each agent
-        # represented as (-item_value, itemID, edge, item_key) to make heap a max-heap of value with smallest ID as the secondary factor
+        # represented as (item_value, itemID, edge, item_key) in a max-heap of value with smallest ID as the secondary factor
         for edge in self.graph.all_e:
             edge_data = self.graph._e_data[edge]
             for itemID in edge_data:
                 item_value = edge_data[itemID]["val"]
-                heapq.heappush(self.all_items_heap, (-item_value, itemID, edge))
+                heapq.heappush_max(self.all_items_heap, (item_value, itemID, edge))
 
                 for agentID in edge:
-                    heapq.heappush(self.agent_items_heap[agentID], (-item_value, itemID, edge))
+                    heapq.heappush_max(self.agent_items_heap[agentID], (item_value, itemID, edge))
 
         # mark that no items have been allocated yet
         self.items_allocated = [False for _ in range(self.num_items_ever_added)]
@@ -147,22 +147,22 @@ class RestrictedAdditiveInstance:
     #   - edge (tupple of agent IDs)
     def allocate_best_item(self, agentID:int=None):
         item = None 
-        # item will be tupple (-value, ID, (agents))
+        # item will be tupple (value, ID, (agents))
         # => item[1] is itemID
         # => self.items_allocated[item[1]] shows if item was previously allocated
         if agentID is not None:
             try:
-                item = heapq.heappop(self.agent_items_heap[agentID])
+                item = heapq.heappop_max(self.agent_items_heap[agentID])
                 while self.items_allocated[item[1]] and self.agent_items_heap:
-                    item = heapq.heappop(self.agent_items_heap[agentID])
+                    item = heapq.heappop_max(self.agent_items_heap[agentID])
             except IndexError:
                 raise ValueError(f"Agent {agentID} requested to allocate an item but has no remaining items.\
                                  \n\tMake sure to test with agent_has_item_available or filter_agents_by_items_available before requesting item.")
         else:   
             try:
-                item = heapq.heappop(self.all_items_heap)
+                item = heapq.heappop_max(self.all_items_heap)
                 while self.items_allocated[item[1]]:
-                    item = heapq.heappop(self.all_items_heap)
+                    item = heapq.heappop_max(self.all_items_heap)
             except IndexError:
                 raise ValueError("All items have been allocated.")
 
@@ -173,7 +173,7 @@ class RestrictedAdditiveInstance:
         self.items_allocated[item[1]] = True
         self.remove_item(item[2], item[1])
         
-        return -item[0], item[1], item[2] # flip value back to positive for clarity outside of this class
+        return item[0], item[1], item[2] 
 
     def filter_agents_by_items_available(self, original_agents_list):
         filtered_agents = [agent for agent in original_agents_list if self.graph.degree_v(agent) > 0]
