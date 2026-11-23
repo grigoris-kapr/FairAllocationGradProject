@@ -20,8 +20,8 @@ def generateRandomItems(agents:int | list[int], m:int, p:float, seed=None):
     if seed:
         random.seed(seed)
 
-    if type(agents) is int:
-        agents = range(agents)
+    if isinstance(agents, int):
+        agents = list(range(agents))
         for i in range(len(agents)):
             agents[i] += 1
 
@@ -29,7 +29,7 @@ def generateRandomItems(agents:int | list[int], m:int, p:float, seed=None):
     for item in range(m):
         edge = []
         for agent in agents:
-            if random() <= p:
+            if random.random() <= p:
                 edge.append(agent)
         if len(edge)>0:
             items.append(edge)
@@ -47,8 +47,8 @@ def generateItemsOfDefinedOrder(agents: int | list, order: tuple, seed=None):
     if seed:
         random.seed(seed)
     
-    if type(agents) is int:
-        agents = range(agents)
+    if isinstance(agents, int):
+        agents = list(range(agents))
         for i in range(len(agents)):
             agents[i] += 1
 
@@ -68,8 +68,8 @@ def generateItemValues_MultipleValueRanges(agents: int | list[int], ranges: list
     if seed:
         random.seed(seed)
     
-    if type(agents) is int:
-        agents = range(agents)
+    if isinstance(agents, int):
+        agents = list(range(agents))
         for i in range(len(agents)):
             agents[i] += 1
 

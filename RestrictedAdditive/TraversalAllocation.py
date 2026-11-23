@@ -1,8 +1,9 @@
 from RestrictedAdditive import RestrictedAdditiveInstance
 from hyperdb import HypergraphDB
 import random
+from typing import Dict, List, Optional
 
-def _random_pick_tr_al(problem_instance:RestrictedAdditiveInstance, seed:int=None):
+def _random_pick_tr_al(problem_instance:RestrictedAdditiveInstance, seed:Optional[int]=None):
     if seed:
         random.seed(seed)
 
@@ -48,9 +49,9 @@ def _random_pick_tr_al(problem_instance:RestrictedAdditiveInstance, seed:int=Non
 # Criteria change depending on 'algorithm' parameter.
 def traversal_allocation(
         problem_instance: RestrictedAdditiveInstance, # an instance of the problem
-        save_dir: str = None, # directory to save instance hypergraph and potentially load for MMS calculations
-        algorithm: str = None, # algorithm to use. Implemented algorithms: {"Random Pick"}
-        seed: int = None, # seed to be used for random 
+        save_dir: Optional[str] = None, # directory to save instance hypergraph and potentially load for MMS calculations
+        algorithm: Optional[str] = None, # algorithm to use. Implemented algorithms: {"Random Pick"}
+        seed: Optional[int] = None, # seed to be used for random 
     ):
     # check valid algorithm
     algs_implemented = {"Random Pick"}

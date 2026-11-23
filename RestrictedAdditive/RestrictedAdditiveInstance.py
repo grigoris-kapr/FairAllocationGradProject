@@ -1,6 +1,6 @@
 from hyperdb import HypergraphDB
 import heapq
-from typing import Dict, List
+from typing import Dict, List, Optional
 import MMS
 
 # A class representing one instance of the problem
@@ -28,7 +28,7 @@ class RestrictedAdditiveInstance:
 
     # Adds agent to the exaple. Agents must be added sequentially.
     # Raises error if agentID already exists.
-    def add_agent(self, agentID:int, metadata:dict=None):
+    def add_agent(self, agentID:int, metadata:Optional[dict]=None):
         if self.complete:
             raise ValueError("Problem Instance was already marked as completed. No additions can be made.")
         if agentID in self.get_agent_IDs():
@@ -40,7 +40,7 @@ class RestrictedAdditiveInstance:
     # agentsInterested: tuple of agents IDs for the agents interested in the item
     # value: the value of the item, to be added to edge metadata
     # metadata: any metadata that we may need to keep for the item
-    def add_item(self, agents_interested:tuple, value:int, item_metadata_provided:dict=None):
+    def add_item(self, agents_interested:tuple, value:int, item_metadata_provided:Optional[dict]=None):
         if self.complete:
             raise ValueError("Problem Instance was already marked as completed. No additions can be made.")
 
@@ -145,7 +145,7 @@ class RestrictedAdditiveInstance:
     #   - item value
     #   - item ID
     #   - edge (tupple of agent IDs)
-    def allocate_best_item(self, agentID:int=None):
+    def allocate_best_item(self, agentID:Optional[int]=None):
         item = None 
         # item will be tupple (value, ID, (agents))
         # => item[1] is itemID
@@ -194,7 +194,7 @@ class RestrictedAdditiveInstance:
             self.mms_were_manually_provided = True
         
     def MMS(self, agentID:int, symmetry_opt=True): 
-        a_data = self.graph.v(agentID)
+        a_data = self.graph._v_data[agentID]
         if "MMS" in a_data:
             return a_data["MMS"]
         else:
