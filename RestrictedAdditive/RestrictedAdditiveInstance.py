@@ -80,7 +80,8 @@ class RestrictedAdditiveInstance:
 
         self.num_items -= 1
         
-
+    # Run after all items have been inserted to create the heaps for allocation. Afterwards, no more items or agents can be added.
+    # Needs to be run before allocate_best_item
     def mark_completed(self):
         if self.complete:
             raise ValueError("Problem Instance was already marked as completed.")
@@ -132,8 +133,15 @@ class RestrictedAdditiveInstance:
     def num_agents(self):
         return self.graph.num_v
 
-    def save(self, save_dir:str):
-        self.graph.save(save_dir)
+    # If ret_dict set to true, uses HypergraphDB's to_hif function to return a formated dict.
+    # Otherwise, saves the same in the file path specified as a json file.
+    def save(self, save_dir:str="", ret_dict:bool=False):
+        if save_dir == "" and not ret_dict:
+            raise ValueError("Must provide save_dir or set ret_dict to True.")
+        if not ret_dict:
+            self.graph.to_hif(save_dir)
+        else:
+            return self.graph.to_hif()
 
     # Returns the first item at top of the respective heap that wasn't allocated. 
     # Requested heap must have unallocated items or a ValueError will be raised.
@@ -208,4 +216,8 @@ class RestrictedAdditiveInstance:
             agents_competing = len(self.graph.nbr_v(agentID)) + 1 # +1 to include themselves
 
             mms = MMS.AdditiveMMSSolver(agents_competing, item_values, symmetry_opt).mms_additive()
+
+            # save for reuse
+            self.graph.update_v(agentID, {"MMS":mms})
+            
             return mms

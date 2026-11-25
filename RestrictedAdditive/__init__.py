@@ -1,7 +1,8 @@
 # Define the __all__ variable for wildcard import
-__all__ = ["RestictedAdditiveInstance","TraversalAllocation","RAItemGenerators"]
+__all__ = ["RestictedAdditiveInstance","TraversalAllocation","RAItemGenerators","RAGeneratorsFromUserInput"]
 
 # Import the submodules
 from .RestrictedAdditiveInstance import RestrictedAdditiveInstance
 from .TraversalAllocation import traversal_allocation
-from .RAItemGenerators import generateRandomItems, generateItemsOfDefinedOrder, generateItemValues_MultipleValueRanges
+from .RAItemGenerators import generateRandomItems, generateItemsOfDefinedOrder, generateItemValues_1_order_N_ranges, generateItemValues_N_orders_1_range
+from .RAGeneratorsFromUserInput import user_input_generateRandomItems, user_input_generateItemsOfDefinedOrder, user_input_generateItemValues_1_order_N_ranges, user_input_generateItemValues_N_orders_1_range

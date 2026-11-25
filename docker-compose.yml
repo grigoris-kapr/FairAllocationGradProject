@@ -1,0 +1,17 @@
+services:
+  fair-alloc:
+    build: .
+    image: fair-alloc
+    working_dir: /workspace
+    volumes:
+      - type: bind
+        source: .
+        target: /workspace
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    tty: true
+    # hypergraph viewer is hardcoded to listen to ip 127.0.0.1 so we need to set up forwarding
+    command: >
+      bash -c "socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:8080" & 
+      exec bash

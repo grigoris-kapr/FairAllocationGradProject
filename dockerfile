@@ -5,6 +5,7 @@ FROM python:3.15-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
+    socat \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
