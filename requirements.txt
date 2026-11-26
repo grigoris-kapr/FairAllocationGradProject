@@ -1,3 +1,4 @@
 hypergraph-db == 0.4.0
+cmake # pip version is more recent and supports python 3.15
 pybind11 
 pytest
